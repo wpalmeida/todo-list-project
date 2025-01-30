@@ -2,15 +2,37 @@
 const taskInput = document.getElementById('taskInput');
 const addTaskBtn = document.getElementById('addTaskBtn');
 const taskList = document.getElementById('taskList');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const logoutBtn = document.getElementById('logoutBtn');
+const changePasswordForm = document.getElementById('changePasswordForm');
+
+let token = localStorage.getItem('token'); // Retrieve token from localStorage
 
 // Load tasks from the server on page load
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('http://localhost:3000/tasks')
+  if (token) {
+    fetchTasks();
+    loginForm.style.display = 'none';
+    taskList.style.display = 'block';
+    logoutBtn.style.display = 'block';
+    changePasswordForm.style.display = 'none';
+  } else {
+    showLoginForm();
+  }
+});
+
+function fetchTasks() {
+  fetch('http://localhost:3000/tasks', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  })
     .then(response => response.json())
     .then(tasks => {
       tasks.forEach(task => addTaskToDOM(task));
     });
-});
+}
 
 // Add task to the DOM
 function addTaskToDOM(task) {
@@ -109,7 +131,8 @@ function addNewTask() {
   fetch('http://localhost:3000/tasks', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     },
     body: JSON.stringify(newTask)
   })
@@ -133,7 +156,8 @@ function updateTask(task) {
   fetch(`http://localhost:3000/tasks/${task.id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
     },
     body: JSON.stringify(task)
   });
@@ -142,6 +166,121 @@ function updateTask(task) {
 // Delete a task
 function deleteTask(taskId) {
   fetch(`http://localhost:3000/tasks/${taskId}`, {
-    method: 'DELETE'
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
   });
 }
+
+// Show login form
+function showLoginForm() {
+  loginForm.style.display = 'block';
+  registerForm.style.display = 'none';
+  taskList.style.display = 'none';
+  logoutBtn.style.display = 'none';
+  changePasswordForm.style.display = 'none';
+}
+
+// Show register form
+function showRegisterForm() {
+  loginForm.style.display = 'none';
+  registerForm.style.display = 'block';
+  taskList.style.display = 'none';
+  logoutBtn.style.display = 'none';
+  changePasswordForm.style.display = 'none';
+}
+
+// Show change password form
+function showChangePasswordForm() {
+  loginForm.style.display = 'none';
+  registerForm.style.display = 'none';
+  taskList.style.display = 'none';
+  logoutBtn.style.display = 'none';
+  changePasswordForm.style.display = 'block';
+}
+
+// Handle login
+loginForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const username = loginForm.querySelector('input[name="username"]').value;
+  const password = loginForm.querySelector('input[name="password"]').value;
+
+  fetch('http://localhost:3000/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, password })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.token) {
+      token = data.token;
+      localStorage.setItem('token', token); // Store token in localStorage
+      loginForm.style.display = 'none';
+      taskList.style.display = 'block';
+      logoutBtn.style.display = 'block';
+      changePasswordForm.style.display = 'none';
+      fetchTasks();
+    } else {
+      alert('Invalid credentials');
+    }
+  });
+});
+
+// Handle registration
+registerForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const username = registerForm.querySelector('input[name="username"]').value;
+  const password = registerForm.querySelector('input[name="password"]').value;
+
+  fetch('http://localhost:3000/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, password })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.id) {
+      alert('Registration successful');
+      showLoginForm();
+    } else {
+      alert('Registration failed');
+    }
+  });
+});
+
+// Handle logout
+logoutBtn.addEventListener('click', () => {
+  token = null;
+  localStorage.removeItem('token'); // Remove token from localStorage
+  showLoginForm();
+});
+
+// Handle change password
+changePasswordForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const username = changePasswordForm.querySelector('input[name="username"]').value;
+  const oldPassword = changePasswordForm.querySelector('input[name="oldPassword"]').value;
+  const newPassword = changePasswordForm.querySelector('input[name="newPassword"]').value;
+
+  fetch('http://localhost:3000/change-password', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ username, oldPassword, newPassword })
+  })
+  .then(response => {
+    if (response.ok) {
+      alert('Password changed successfully');
+      changePasswordForm.reset();
+      showLoginForm(); // Redirect to login page
+    } else {
+      response.text().then(text => alert(text));
+    }
+  });
+});

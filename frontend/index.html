@@ -3,17 +3,50 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>To-Do List</title>
+  <title>Todo List</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <h1>To-Do List</h1>
-    <div class="input-container">
-      <input type="text" id="taskInput" placeholder="Enter a new task...">
-      <button id="addTaskBtn">Add Task</button>
+    <div id="loginForm" class="form-container">
+      <h2>Login</h2>
+      <form>
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+      </form>
+      <button class="switch-btn" onclick="showRegisterForm()">Register</button>
+      <button class="switch-btn" onclick="showChangePasswordForm()">Change Password</button>
     </div>
-    <ul id="taskList"></ul>
+
+    <div id="registerForm" class="form-container" style="display:none;">
+      <h2>Register</h2>
+      <form>
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="password" placeholder="Password" required>
+        <button type="submit">Register</button>
+      </form>
+      <button class="switch-btn" onclick="showLoginForm()">Login</button>
+    </div>
+
+    <div id="taskList" style="display:none;">
+      <input type="text" id="taskInput" placeholder="New task">
+      <button id="addTaskBtn">Add Task</button>
+      <ul id="taskList"></ul>
+    </div>
+
+    <div id="changePasswordForm" class="form-container" style="display:none;">
+      <h2>Change Password</h2>
+      <form>
+        <input type="text" name="username" placeholder="Username" required>
+        <input type="password" name="oldPassword" placeholder="Old Password" required>
+        <input type="password" name="newPassword" placeholder="New Password" required>
+        <button type="submit">Change Password</button>
+      </form>
+      <button class="switch-btn" onclick="showLoginForm()">Back to Login</button>
+    </div>
+
+    <button id="logoutBtn" style="display:none;">Logout</button>
   </div>
 
   <script src="script.js"></script>
