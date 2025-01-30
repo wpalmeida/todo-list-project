@@ -1,17 +1,11 @@
-FROM node:14
+# Use the official Nginx image as the base image
+FROM nginx:alpine
 
-# Create app directory
-WORKDIR /usr/src/app
+# Copy the build output to the Nginx HTML directory
+COPY . /usr/share/nginx/html
 
-# Install app dependencies
-COPY package*.json ./
-RUN npm install
+# Expose port 80
+EXPOSE 80
 
-# Bundle app source
-COPY . .
-
-# Expose the port the app runs on
-EXPOSE 8080
-
-# Command to run the app
-CMD ["npm", "start"]
+# Start Nginx server
+CMD ["nginx", "-g", "daemon off;"]
